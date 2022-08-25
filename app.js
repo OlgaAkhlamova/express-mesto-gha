@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRouter = require('./src/routes/users');
+const cardRouter = require('./src/routes/cards');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -11,15 +12,23 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb')
   .then(() => console.log('connected'))
-  .catch((error) => console.log(error));
+  .catch((err) => console.log(`Ошибка ${err.name}: ${err.message}`));
 
-app.use('/', (req, res, next) => {
+app.use((req, res, next) => {
+  req.user = {
+    _id: '6304b7e4a640ff7da36f0a87',
+  };
+  next();
+});
+
+app.use((req, res, next) => {
   console.log(`${req.method}: ${req.path} ${JSON.stringify(req.body)}`);
-  res.send('Рано радоваться, когда ничего не понимаешь');
+  res.send('Дорогу осилит идущий');
   next();
 });
 
 app.use('/', userRouter);
+app.use('/', cardRouter);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
