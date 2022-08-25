@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const userRouter = require('./src/routes/users');
 const cardRouter = require('./src/routes/cards');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3007 } = process.env;
 const app = express();
 
 app.use(bodyParser.json());
@@ -23,7 +23,6 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   console.log(`${req.method}: ${req.path} ${JSON.stringify(req.body)}`);
-  res.send('Дорогу осилит идущий');
   next();
 });
 
