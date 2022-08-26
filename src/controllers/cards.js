@@ -23,7 +23,10 @@ module.exports.createCard = (req, res) => {
   console.log(req.user._id);
   const { name, link } = req.body;
   const owner = req.user._id;
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner }, {
+    new: true,
+    runValidators: true,
+  })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -36,6 +39,7 @@ module.exports.createCard = (req, res) => {
       }
       if (err.name === 'ServerError') {
         res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
+        return;
       }
       console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
     });

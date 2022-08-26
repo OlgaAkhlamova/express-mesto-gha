@@ -47,7 +47,7 @@ module.exports.getUserById = (req, res) => {
         res.status(404).send({ message: 'Ресурс не найден' });
         return;
       }
-      res.status(200).send(user);
+      res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
