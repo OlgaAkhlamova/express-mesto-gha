@@ -2,7 +2,7 @@ const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.status(200).send(users))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
@@ -21,8 +21,9 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar }, { runValidators: true })
-    .then((user) => res.status(201).send({ user }))
+  console.log(req.body);
+  User.create({ name, about, avatar })
+    .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
@@ -40,8 +41,7 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  console.log(req.params.userId);
-  User.findById(req.params.userId)
+  User.findById(req.params)
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Ресурс не найден' });
@@ -52,22 +52,17 @@ module.exports.getUserById = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
-        return;
-      }
-      if (err.name === 'NotFound') {
+      } else if (err.name === 'NotFound') {
         res.status(404).send({ message: `Ресурс не найден: ${err.message}` });
-        return;
-      }
-      if (err.name === 'ServerError') {
+      } else if (err.name === 'ServerError') {
         res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
-        return;
       }
       console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
 module.exports.patchUser = (req, res) => {
-  const { name, about } = req.body;
+  const { name = req.params.name, about = req.params.about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
     runValidators: true,
@@ -76,13 +71,9 @@ module.exports.patchUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
-        return;
-      }
-      if (err.name === 'NotFound') {
+      } else if (err.name === 'NotFound') {
         res.status(404).send({ message: `Ресурс не найден: ${err.message}` });
-        return;
-      }
-      if (err.name === 'ServerError') {
+      } else if (err.name === 'ServerError') {
         res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
       }
       console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
