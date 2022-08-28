@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   owner: {
-    type: mongoose.ObjectId,
+    type: mongoose.Shema.Types.ObjectId,
+    ref: 'user',
     required: true,
   },
   likes: [

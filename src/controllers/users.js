@@ -1,21 +1,13 @@
 const User = require('../models/user');
+const {
+  OK, CREATED, BAD_REQUEST, NOT_FOUND, SERVER_ERROR,
+} = require('../utils/errorStatus');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.status(OK).send(users))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
-        return;
-      }
-      if (err.name === 'NotFound') {
-        res.status(404).send({ message: `Ресурс не найден: ${err.message}` });
-        return;
-      }
-      if (err.name === 'ServerError') {
-        res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
-      }
-      console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
+      res.status(SERVER_ERROR).send({ message: `Ошибка сервера: ${err.message}` });
     });
 };
 
@@ -23,20 +15,13 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   console.log(req.body);
   User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(CREATED).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
-        return;
+        res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });
+      } else {
+        res.status(SERVER_ERROR).send({ message: `Ошибка сервера: ${err.message}` });
       }
-      if (err.name === 'NotFound') {
-        res.status(404).send({ message: `Ресурс не найден: ${err.message}` });
-        return;
-      }
-      if (err.name === 'ServerError') {
-        res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
-      }
-      console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -44,48 +29,48 @@ module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Такого пользователя нет' });
+        res.status(NOT_FOUND).send({ message: 'Такого пользователя нет' });
         return;
       }
-      res.status(200).send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
-      } else if (err.name === 'NotFound') {
-        res.status(404).send({ message: `Ресурс не найден: ${err.message}` });
-      } else if (err.name === 'ServerError') {
-        res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });
+      } else {
+        res.status(SERVER_ERROR).send({ message: `Ошибка сервера: ${err.message}` });
       }
-      console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
 module.exports.patchUser = (req, res) => {
-  const { name = req.params.name, about = req.params.about } = req.body;
+  const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
     runValidators: true,
   })
-    .then((user) => res.status(200).send({ user }))
+    .then((user) => res.status(OK).send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Ошибка валидации: ${err.message}` });
-      } else if (err.name === 'NotFound') {
-        res.status(404).send({ message: `Ресурс не найден: ${err.message}` });
-      } else if (err.name === 'ServerError') {
-        res.status(500).send({ message: `Ошибка сервера: ${err.message}` });
+        res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });
+      } else {
+        res.status(SERVER_ERROR).send({ message: `Ошибка сервера: ${err.message}` });
       }
-      console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
 module.exports.patchAvatar = (req, res) => {
-  const { avatar } = req.body.avatar;
+  const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true,
     runValidators: true,
   })
     .then((user) => res.send({ user }))
-    .catch((err) => res.send({ message: `Произошла ошибка ${err.name} c текстом ${err.message}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });
+      } else {
+        res.status(SERVER_ERROR).send({ message: `Ошибка сервера: ${err.message}` });
+      }
+    });
 };
