@@ -13,7 +13,6 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  console.log(req.body);
   User.create({ name, about, avatar })
     .then((user) => res.status(CREATED).send(user))
     .catch((err) => {
@@ -29,7 +28,7 @@ module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND).send({ message: 'Такого пользователя нет' });
+        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
         return;
       }
       res.send(user);
@@ -49,7 +48,13 @@ module.exports.patchUser = (req, res) => {
     new: true,
     runValidators: true,
   })
-    .then((user) => res.status(OK).send({ user }))
+    .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+        return;
+      }
+      res.status(OK).send({ user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });
@@ -65,7 +70,13 @@ module.exports.patchAvatar = (req, res) => {
     new: true,
     runValidators: true,
   })
-    .then((user) => res.send({ user }))
+    .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+        return;
+      }
+      res.status(OK).send({ user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });

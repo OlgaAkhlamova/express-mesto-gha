@@ -12,21 +12,19 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.createCard = (req, res) => {
-  console.log(req.user._id);
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner }, {
     new: true,
     runValidators: true,
   })
-    .then((card) => res.status(CREATED).send(card))
+    .then((card) => res.status(CREATED).send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: `Ошибка валидации: ${err.message}` });
       } else {
         res.status(SERVER_ERROR).send({ message: `Ошибка сервера: ${err.message}` });
       }
-      console.log({ message: `Произошла неизвестная ошибка ${err.name} c текстом ${err.message}` });
     });
 };
 
@@ -36,10 +34,10 @@ module.exports.deleteCard = (req, res) => {
     .orFail(() => {
       throw new Error('NotFound');
     })
-    .then((cards) => res.send({ data: cards }))
+    .then((cards) => res.status(OK).send({ data: cards }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(NOT_FOUND).send({ message: 'Такой карточки не существует' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
       if (err.name === 'CastError') {
@@ -59,10 +57,10 @@ module.exports.likeCard = (req, res) => {
     .orFail(() => {
       throw new Error('NotFound');
     })
-    .then((card) => res.send(card))
+    .then((card) => res.status(OK).send({ card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(NOT_FOUND).send({ message: 'Такой карточки не существует' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
       if (err.name === 'CastError') {
@@ -82,10 +80,10 @@ module.exports.dislikeCard = (req, res) => {
     .orFail(() => {
       throw new Error('NotFound');
     })
-    .then((card) => res.send(card))
+    .then((card) => res.status(OK).send({ card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(NOT_FOUND).send({ message: 'Такой карточки не существует' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
       if (err.name === 'CastError') {
