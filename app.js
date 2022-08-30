@@ -34,9 +34,8 @@ app.use('/', auth, cardRouter);
 
 app.use(errors());
 
-app.use('/', (err, req, res, next) => {
-  next(new NotFoundError({ message: 'Страница не найдена' }));
-  res.status(err.statusCode).send({ message: err.message });
+app.use('/', () => {
+  throw new NotFoundError('Страница не найдена');
 });
 
 app.listen(PORT, () => {
