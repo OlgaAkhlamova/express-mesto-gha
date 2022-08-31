@@ -1,6 +1,14 @@
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
 
-const checkLink = /(?:https?):\/\/(\w+:?\w*)?(\S+)(:\d+)?(\.\w{2,3})(\/|\/([\w#!:.?+=&%!\-/]))?/;
+const validateUrl = ((value) => {
+  const result = validator.isURL(value);
+  if (result) {
+    return value;
+  } else {
+    throw new Error('URL validation err');
+  }
+});
 
 const authValidation = celebrate({
   body: Joi.object().keys({
@@ -13,7 +21,7 @@ const regValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(checkLink),
+    avatar: Joi.string().custom(method),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -34,14 +42,14 @@ const userIdValidation = celebrate({
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().pattern(checkLink),
+    avatar: Joi.string().required().custom(method),
   }),
 });
 
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(checkLink),
+    link: Joi.string().required().custom(method),
   }),
 });
 
