@@ -31,8 +31,8 @@ app.post('/signup', regValidation, createUser);
 
 app.use('/', auth, userRouter);
 app.use('/', auth, cardRouter);
-app.use('/', (req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Страница не найдена' });
+app.use('/', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(errors());
