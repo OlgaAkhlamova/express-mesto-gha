@@ -3,11 +3,10 @@ const validator = require('validator');
 
 const validateUrl = ((value) => {
   const result = validator.isURL(value);
-  if (result) {
-    return value;
-  } else {
+  if (!result) {
     throw new Error('URL validation err');
   }
+  return value;
 });
 
 const authValidation = celebrate({
@@ -21,7 +20,7 @@ const regValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom(method),
+    avatar: Joi.string().custom(validateUrl),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -42,14 +41,14 @@ const userIdValidation = celebrate({
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().custom(method),
+    avatar: Joi.string().required().custom(validateUrl),
   }),
 });
 
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().custom(method),
+    link: Joi.string().required().custom(validateUrl),
   }),
 });
 
